@@ -1,0 +1,50 @@
+#!/bin/sh
+
+error ()
+{
+	_message="${1}"
+	printf "ERROR: %s\n" "${_message}" 2>&1
+}
+
+cleanup ()
+{
+	_dir="${1}"
+	if [ -e "${_dir}" ]; then
+		rm -rf "${_dir}"
+	fi
+}
+
+clone_repo ()
+{
+	_user="${1}"
+	_repo="${2}"
+
+	_dir="${HOME}/.local/src/${_repo}"
+	_url="git@github.com:${_user}/${_repo}"
+
+	if [ -e "${_dir}" ]; then
+		error "directory ${_dir} already exists!"
+		exit 1
+	fi
+
+	git --git-dir="${_dir}" init -b master
+	git --git-dir="${_dir}" config core.bare false
+	git --git-dir="${_dir}" config status.showuntrackedfiles no
+	git --git-dir="${_dir}" remote add origin "${_url}"
+	git --git-dir="${_dir}" fetch || {
+		error "cannot fetch repo ${_url}"
+		cleanup "${_dir}"
+		exit 1
+	}
+
+	git --git-dir="${_dir}" reset origin/master
+	git --git-dir="${_dir}" branch -u origin/master
+	git --git-dir="${_dir}" checkout -- .
+	git --git-dir="${_dir}" submodule update --init --recursive
+}
+
+_user="${1:-"nikitalocalhost"}"
+_prefix="${2:-"dotfiles"}"
+
+
+clone_repo "${_user}" "${_prefix}-public"
