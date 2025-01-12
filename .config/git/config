@@ -1,0 +1,8 @@
+[commit]
+	gpgsign = true
+[gpg]
+	format = ssh
+[user]
+	signingkey = ~/.ssh/id_ed25519.pub
+	email = nikita.localhost@gmail.com
+	name = Nikita Localhost
